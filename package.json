@@ -1,0 +1,31 @@
+{
+  "name": "programmedstyle-website",
+  "version": "1.0.0",
+  "description": "Professional web development company website",
+  "scripts": {
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "start:server": "cd server && npm start",
+    "start:client": "cd client && npm start",
+    "create-admin": "cd server && node scripts/createAdmin.js"
+  },
+  "keywords": [
+    "web-development",
+    "react",
+    "nextjs",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "ProgrammedStyle",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
