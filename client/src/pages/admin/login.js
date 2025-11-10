@@ -26,7 +26,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(async () => {
+  useEffect(() => {
     // Check if already logged in
     const token = localStorage.getItem('adminToken');
     if (token) {

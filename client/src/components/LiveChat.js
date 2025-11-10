@@ -52,12 +52,16 @@ export default function LiveChat() {
   }, [messages]);
 
   useEffect(() => {
-    if (open && !socketRef.current) {
+    if (!open) return;
+
+    if (!socketRef.current) {
       socketRef.current = io(`${SOCKET_URL}/chat`);
 
       socketRef.current.on('connect', () => {
         console.log('Connected to chat');
-        socketRef.current.emit('join', { room: sessionId });
+        if (socketRef.current) {
+          socketRef.current.emit('join', { room: sessionId });
+        }
       });
 
       socketRef.current.on('messageSent', (data) => {
@@ -85,7 +89,7 @@ export default function LiveChat() {
     }
 
     return () => {
-      if (socketRef.current) {
+      if (socketRef.current && typeof socketRef.current.disconnect === 'function') {
         socketRef.current.disconnect();
         socketRef.current = null;
       }

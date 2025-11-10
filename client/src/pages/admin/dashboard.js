@@ -70,7 +70,9 @@ export default function AdminDashboard() {
     });
 
     return () => {
-      socket.disconnect();
+      if (socket && typeof socket.disconnect === 'function') {
+        socket.disconnect();
+      }
     };
   }, [router]);
 
