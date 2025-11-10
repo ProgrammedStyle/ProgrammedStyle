@@ -96,6 +96,17 @@ router.post('/create-admin', [
   body('name').notEmpty().trim()
 ], async (req, res) => {
   try {
+    // Check for setup secret in production
+    // TEMPORARILY DISABLED FOR INITIAL ADMIN CREATION
+    /*
+    if (process.env.NODE_ENV === 'production') {
+      const setupSecret = req.headers['x-setup-secret'] || req.body.setupSecret;
+      if (!setupSecret || setupSecret !== process.env.ADMIN_SETUP_SECRET) {
+        return res.status(403).json({ error: 'Unauthorized: Invalid setup secret' });
+      }
+    }
+    */
+    
     // Check if admin already exists
     const existingAdmin = await User.findOne({ role: 'admin' });
     if (existingAdmin) {
