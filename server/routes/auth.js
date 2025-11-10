@@ -90,22 +90,19 @@ router.get('/me', authenticate, async (req, res) => {
  * @desc    Create admin user (one-time setup)
  * @access  Public (should be secured in production)
  */
-router.post('/create-admin', [
+/*router.post('/create-admin', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 8 }),
   body('name').notEmpty().trim()
 ], async (req, res) => {
   try {
     // Check for setup secret in production
-    // TEMPORARILY DISABLED FOR INITIAL ADMIN CREATION
-    /*
     if (process.env.NODE_ENV === 'production') {
       const setupSecret = req.headers['x-setup-secret'] || req.body.setupSecret;
       if (!setupSecret || setupSecret !== process.env.ADMIN_SETUP_SECRET) {
         return res.status(403).json({ error: 'Unauthorized: Invalid setup secret' });
       }
     }
-    */
     
     // Check if admin already exists
     const existingAdmin = await User.findOne({ role: 'admin' });
@@ -140,7 +137,7 @@ router.post('/create-admin', [
     console.error('Create admin error:', error);
     res.status(500).json({ error: 'Server error' });
   }
-});
+});*/
 
 module.exports = router;
 
