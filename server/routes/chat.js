@@ -10,7 +10,7 @@ const { authenticate, isAdmin } = require('../middleware/auth');
  */
 router.get('/messages', authenticate, isAdmin, async (req, res) => {
   try {
-    const { page = 1, limit = 50, unreadOnly = false } = req.query;
+    const { page = 1, limit = 1000, unreadOnly = false } = req.query;
     
     const query = unreadOnly === 'true' ? { read: false } : {};
     
@@ -89,32 +89,45 @@ router.post('/messages/:id/reply', authenticate, isAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Reply text is required' });
     }
     
-    const message = await ChatMessage.findByIdAndUpdate(
-      req.params.id,
-      {
-        adminReply: reply,
-        replied: true,
-        repliedAt: new Date(),
-        read: true
-      },
-      { new: true }
-    );
+    // Get the original message to get session and user info
+    const originalMessage = await ChatMessage.findById(req.params.id);
     
-    if (!message) {
+    if (!originalMessage) {
       return res.status(404).json({ error: 'Message not found' });
     }
     
-    // Emit reply via Socket.IO
+    // Mark original message as read
+    originalMessage.read = true;
+    await originalMessage.save();
+    
+    // Create a new message for the admin reply
+    const adminReplyMessage = new ChatMessage({
+      name: 'Admin',
+      email: 'admin@programmedstyle.com',
+      message: reply,
+      sessionId: originalMessage.sessionId,
+      timestamp: new Date(),
+      read: true,
+      replied: false,
+      isAdminMessage: true
+    });
+    
+    await adminReplyMessage.save();
+    
+    // Emit reply via Socket.IO to both user and admin
     const io = require('../server').io;
     if (io) {
-      io.of('/chat').to(message.sessionId).emit('adminReply', {
-        messageId: message._id,
+      const chatNamespace = io.of('/chat');
+      // Send to user's session
+      chatNamespace.to(originalMessage.sessionId).emit('adminReply', {
         reply,
-        repliedAt: message.repliedAt
+        repliedAt: adminReplyMessage.timestamp
       });
+      // Also send to admin room for real-time dashboard update
+      chatNamespace.to('admin').emit('newMessage', adminReplyMessage);
     }
     
-    res.json({ success: true, message });
+    res.json({ success: true, message: adminReplyMessage });
   } catch (error) {
     console.error('Reply to message error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -143,6 +156,28 @@ router.get('/stats', authenticate, isAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Get chat stats error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+/**
+ * @route   DELETE /api/chat/session/:sessionId
+ * @desc    Delete all messages in a session (Admin only)
+ * @access  Private (Admin)
+ */
+router.delete('/session/:sessionId', authenticate, isAdmin, async (req, res) => {
+  try {
+    const result = await ChatMessage.deleteMany({ 
+      sessionId: req.params.sessionId 
+    });
+    
+    res.json({ 
+      success: true, 
+      message: 'Chat deleted successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Delete chat error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

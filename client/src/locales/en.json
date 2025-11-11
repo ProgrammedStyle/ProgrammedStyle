@@ -1,0 +1,158 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "hero": {
+    "badge": "Professional Web Development",
+    "title": "Build Your Dream Website With Us",
+    "description": "We create stunning, modern, and responsive websites that help your business stand out online. From concept to launch, we're with you every step of the way.",
+    "getStarted": "Get Started",
+    "ourServices": "Our Services",
+    "stats": {
+      "projects": "Projects Completed",
+      "clients": "Happy Clients",
+      "experience": "Years Experience",
+      "support": "Support Available"
+    }
+  },
+  "services": {
+    "title": "OUR SERVICES",
+    "heading": "What We",
+    "headingHighlight": "Offer",
+    "description": "Comprehensive web development services designed to bring your digital vision to life",
+    "customWeb": {
+      "title": "Custom Web Development",
+      "description": "Tailored websites built with the latest technologies like React, Next.js, and Node.js to meet your unique business needs."
+    },
+    "responsive": {
+      "title": "Responsive Design",
+      "description": "Mobile-first designs that look perfect on any device, from smartphones to desktop computers."
+    },
+    "ecommerce": {
+      "title": "E-Commerce Solutions",
+      "description": "Full-featured online stores with secure payment integration, inventory management, and user-friendly shopping experiences."
+    },
+    "seo": {
+      "title": "SEO Optimization",
+      "description": "Search engine optimization to help your website rank higher and attract more organic traffic."
+    },
+    "performance": {
+      "title": "Performance Optimization",
+      "description": "Lightning-fast loading times and optimal performance to keep your visitors engaged."
+    },
+    "security": {
+      "title": "Security & Maintenance",
+      "description": "Regular updates, security patches, and ongoing support to keep your website safe and running smoothly."
+    }
+  },
+  "portfolio": {
+    "title": "OUR WORK",
+    "heading": "Recent",
+    "headingHighlight": "Projects",
+    "description": "Take a look at some of our recent projects that showcase our expertise and creativity",
+    "projects": {
+      "ecommerce": {
+        "title": "E-Commerce Platform",
+        "description": "A modern online store with advanced features and secure payment integration."
+      },
+      "corporate": {
+        "title": "Corporate Website",
+        "description": "Professional corporate website with CMS integration and SEO optimization."
+      },
+      "realEstate": {
+        "title": "Real Estate Platform",
+        "description": "Property listing platform with advanced search and filtering capabilities."
+      },
+      "booking": {
+        "title": "Booking System",
+        "description": "Online appointment booking system with calendar integration and notifications."
+      },
+      "socialMedia": {
+        "title": "Social Media Dashboard",
+        "description": "Analytics dashboard for managing multiple social media accounts."
+      },
+      "restaurant": {
+        "title": "Restaurant Website",
+        "description": "Beautiful restaurant website with online menu and reservation system."
+      }
+    }
+  },
+  "about": {
+    "title": "ABOUT US",
+    "heading": "Why Choose",
+    "headingHighlight": "Us",
+    "description": "We are a team of passionate developers dedicated to creating exceptional web experiences. With years of experience and a commitment to excellence, we transform your ideas into reality.",
+    "features": {
+      "experts": "Expert developers with years of experience",
+      "modern": "Modern technology stack",
+      "responsive": "Responsive and mobile-first design",
+      "seo": "SEO optimized from the ground up",
+      "fast": "Fast turnaround times",
+      "support": "Ongoing support and maintenance",
+      "pricing": "Competitive pricing",
+      "communication": "Clear communication throughout"
+    },
+    "values": {
+      "clientFocused": {
+        "title": "Client-Focused",
+        "description": "Your success is our success. We work closely with you to understand your needs."
+      },
+      "quality": {
+        "title": "Quality First",
+        "description": "We never compromise on quality and always strive for excellence."
+      },
+      "passionate": {
+        "title": "Passionate Team",
+        "description": "We love what we do, and it shows in every project we deliver."
+      }
+    }
+  },
+  "contact": {
+    "title": "GET IN TOUCH",
+    "heading": "Contact",
+    "headingHighlight": "Us",
+    "description": "Have a project in mind? Let's talk about how we can help bring your vision to life",
+    "info": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location"
+    },
+    "form": {
+      "name": "Your Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Your Message",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "success": "Thank you for your message! We'll get back to you soon.",
+      "error": "Failed to send message. Please try again."
+    }
+  },
+  "footer": {
+    "description": "Building modern, professional websites that help businesses grow online. We transform your vision into reality with cutting-edge web technologies.",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us",
+    "copyright": "ProgrammedStyle. All rights reserved."
+  },
+  "liveChat": {
+    "title": "Live Chat",
+    "subtitle": "We're here to help!",
+    "welcome": "Welcome! 👋",
+    "instruction": "Please provide your information to start chatting with us.",
+    "yourName": "Your Name",
+    "emailAddress": "Email Address",
+    "startChat": "Start Chat",
+    "typePlaceholder": "Type your message...",
+    "greeting": "Hello {{name}}! How can we help you today?",
+    "startNewChat": "Start New Chat",
+    "deleteChat": "Delete Chat",
+    "confirmDelete": "Are you sure you want to delete this chat?",
+    "chatDeleted": "Chat deleted successfully"
+  }
+}
+

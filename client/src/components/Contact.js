@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslation } from '../contexts/LanguageContext';
 import SendIcon from '@mui/icons-material/Send';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -22,6 +23,9 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function Contact() {
+  const { t, language } = useTranslation();
+  const isRTL = language === 'ar';
+
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -72,18 +76,18 @@ export default function Contact() {
   const contactInfo = [
     {
       icon: <EmailIcon sx={{ fontSize: 32 }} />,
-      title: 'Email',
-      value: 'info@programmedstyle.com',
+      title: t('contact.info.email'),
+      value: 'programmedstyle@gmail.com',
     },
     {
       icon: <PhoneIcon sx={{ fontSize: 32 }} />,
-      title: 'Phone',
-      value: '+1 (555) 123-4567',
+      title: t('contact.info.phone'),
+      value: '00970592067569',
     },
     {
       icon: <LocationOnIcon sx={{ fontSize: 32 }} />,
-      title: 'Location',
-      value: '123 Web Street, Digital City, DC 12345',
+      title: t('contact.info.location'),
+      value: 'Nablus Street, Qalqilia, Palestine',
     },
   ];
 
@@ -112,7 +116,7 @@ export default function Contact() {
                 letterSpacing: 2,
               }}
             >
-              GET IN TOUCH
+              {t('contact.title')}
             </Typography>
             <Typography
               variant="h2"
@@ -123,15 +127,14 @@ export default function Contact() {
                 fontSize: { xs: '2.5rem', md: '3rem' },
               }}
             >
-              Contact <span className="gradient-text">Us</span>
+              {t('contact.heading')} <span className="gradient-text">{t('contact.headingHighlight')}</span>
             </Typography>
             <Typography
               variant="h6"
               color="text.secondary"
               sx={{ maxWidth: 700, mx: 'auto', lineHeight: 1.6 }}
             >
-              Have a project in mind? Let's talk about how we can help bring 
-              your vision to life
+              {t('contact.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -205,7 +208,7 @@ export default function Contact() {
                       <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
-                          label="Your Name"
+                          label={t('contact.form.name')}
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
@@ -215,7 +218,7 @@ export default function Contact() {
                       <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
-                          label="Email Address"
+                          label={t('contact.form.email')}
                           name="email"
                           type="email"
                           value={formData.email}
@@ -226,7 +229,7 @@ export default function Contact() {
                       <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
-                          label="Phone Number"
+                          label={t('contact.form.phone')}
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
@@ -235,7 +238,7 @@ export default function Contact() {
                       <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
-                          label="Subject"
+                          label={t('contact.form.subject')}
                           name="subject"
                           value={formData.subject}
                           onChange={handleChange}
@@ -245,7 +248,7 @@ export default function Contact() {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Your Message"
+                          label={t('contact.form.message')}
                           name="message"
                           multiline
                           rows={6}
@@ -257,7 +260,7 @@ export default function Contact() {
                       <Grid item xs={12}>
                         {success && (
                           <Alert severity="success" sx={{ mb: 2 }}>
-                            Thank you for your message! We'll get back to you soon.
+                            {t('contact.form.success')}
                           </Alert>
                         )}
                         {error && (
@@ -271,10 +274,19 @@ export default function Contact() {
                           size="large"
                           fullWidth
                           disabled={loading}
-                          endIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
-                          sx={{ py: 1.5 }}
+                          {...(isRTL 
+                            ? { startIcon: loading ? <CircularProgress size={20} /> : <SendIcon /> }
+                            : { endIcon: loading ? <CircularProgress size={20} /> : <SendIcon /> }
+                          )}
+                          sx={{ 
+                            py: 1.5,
+                            '& .MuiButton-startIcon': {
+                              marginLeft: isRTL ? '12px' : '-4px',
+                              marginRight: isRTL ? '0px' : '8px',
+                            },
+                          }}
                         >
-                          {loading ? 'Sending...' : 'Send Message'}
+                          {loading ? t('contact.form.sending') : t('contact.form.send')}
                         </Button>
                       </Grid>
                     </Grid>
@@ -288,4 +300,5 @@ export default function Contact() {
     </Box>
   );
 }
+
 

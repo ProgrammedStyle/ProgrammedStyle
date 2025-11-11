@@ -18,18 +18,21 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import CodeIcon from '@mui/icons-material/Code';
 import Link from 'next/link';
-
-const navItems = [
-  { label: 'Home', href: '#home' },
-  { label: 'Services', href: '#services' },
-  { label: 'Portfolio', href: '#portfolio' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
-];
+import { useTranslation } from '../contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const navItems = [
+    { label: t('nav.home'), href: '#home' },
+    { label: t('nav.services'), href: '#services' },
+    { label: t('nav.portfolio'), href: '#portfolio' },
+    { label: t('nav.about'), href: '#about' },
+    { label: t('nav.contact'), href: '#contact' },
+  ];
 
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -54,7 +57,8 @@ export default function Navbar() {
 
   const drawer = (
     <Box sx={{ width: 280, height: '100%', bgcolor: 'background.paper' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+        <LanguageSwitcher scrolled={true} />
         <IconButton onClick={handleDrawerToggle}>
           <CloseIcon />
         </IconButton>
@@ -88,7 +92,7 @@ export default function Navbar() {
           bgcolor: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
           backdropFilter: scrolled ? 'blur(10px)' : 'none',
           transition: 'all 0.3s ease',
-          borderBottom: scrolled ? '1px solid rgba(16, 185, 129, 0.1)' : 'none',
+          borderBottom: scrolled ? '1px solid rgba(16, 185, 129, 0.15)' : 'none',
         }}
       >
         <Container maxWidth="lg">
@@ -131,7 +135,7 @@ export default function Navbar() {
             </Box>
 
             {/* Desktop Menu */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
               {navItems.map((item) => (
                 <Button
                   key={item.label}
@@ -149,6 +153,7 @@ export default function Navbar() {
                   {item.label}
                 </Button>
               ))}
+              <LanguageSwitcher scrolled={scrolled} />
             </Box>
 
             {/* Mobile Menu Button */}

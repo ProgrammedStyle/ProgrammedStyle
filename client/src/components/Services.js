@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../contexts/LanguageContext';
 import { Box, Container, Typography, Grid, Card, CardContent } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -9,40 +10,42 @@ import SearchIcon from '@mui/icons-material/Search';
 import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
 
-const services = [
-  {
-    icon: <WebIcon sx={{ fontSize: 48 }} />,
-    title: 'Custom Web Development',
-    description: 'Tailored websites built with the latest technologies like React, Next.js, and Node.js to meet your unique business needs.',
-  },
-  {
-    icon: <PhoneAndroidIcon sx={{ fontSize: 48 }} />,
-    title: 'Responsive Design',
-    description: 'Mobile-first designs that look perfect on any device, from smartphones to desktop computers.',
-  },
-  {
-    icon: <ShoppingCartIcon sx={{ fontSize: 48 }} />,
-    title: 'E-Commerce Solutions',
-    description: 'Full-featured online stores with secure payment integration, inventory management, and user-friendly shopping experiences.',
-  },
-  {
-    icon: <SearchIcon sx={{ fontSize: 48 }} />,
-    title: 'SEO Optimization',
-    description: 'Search engine optimization to help your website rank higher and attract more organic traffic.',
-  },
-  {
-    icon: <SpeedIcon sx={{ fontSize: 48 }} />,
-    title: 'Performance Optimization',
-    description: 'Lightning-fast loading times and optimal performance to keep your visitors engaged.',
-  },
-  {
-    icon: <SecurityIcon sx={{ fontSize: 48 }} />,
-    title: 'Security & Maintenance',
-    description: 'Regular updates, security patches, and ongoing support to keep your website safe and running smoothly.',
-  },
-];
-
 export default function Services() {
+  const { t } = useTranslation();
+
+  const services = [
+    {
+      icon: <WebIcon sx={{ fontSize: 48 }} />,
+      title: t('services.customWeb.title'),
+      description: t('services.customWeb.description'),
+    },
+    {
+      icon: <PhoneAndroidIcon sx={{ fontSize: 48 }} />,
+      title: t('services.responsive.title'),
+      description: t('services.responsive.description'),
+    },
+    {
+      icon: <ShoppingCartIcon sx={{ fontSize: 48 }} />,
+      title: t('services.ecommerce.title'),
+      description: t('services.ecommerce.description'),
+    },
+    {
+      icon: <SearchIcon sx={{ fontSize: 48 }} />,
+      title: t('services.seo.title'),
+      description: t('services.seo.description'),
+    },
+    {
+      icon: <SpeedIcon sx={{ fontSize: 48 }} />,
+      title: t('services.performance.title'),
+      description: t('services.performance.description'),
+    },
+    {
+      icon: <SecurityIcon sx={{ fontSize: 48 }} />,
+      title: t('services.security.title'),
+      description: t('services.security.description'),
+    },
+  ];
+
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -73,7 +76,7 @@ export default function Services() {
                 letterSpacing: 2,
               }}
             >
-              OUR SERVICES
+              {t('services.title')}
             </Typography>
             <Typography
               variant="h2"
@@ -84,15 +87,14 @@ export default function Services() {
                 fontSize: { xs: '2.5rem', md: '3rem' },
               }}
             >
-              What We <span className="gradient-text">Offer</span>
+              {t('services.heading')} <span className="gradient-text">{t('services.headingHighlight')}</span>
             </Typography>
             <Typography
               variant="h6"
               color="text.secondary"
               sx={{ maxWidth: 700, mx: 'auto', lineHeight: 1.6 }}
             >
-              Comprehensive web development services designed to bring your 
-              digital vision to life
+              {t('services.description')}
             </Typography>
           </Box>
         </motion.div>
@@ -159,4 +161,5 @@ export default function Services() {
     </Box>
   );
 }
+
 

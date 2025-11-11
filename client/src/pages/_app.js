@@ -5,6 +5,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import createEmotionCache from '../utils/createEmotionCache';
 import theme from '../theme/theme';
+import { LanguageProvider } from '../contexts/LanguageContext';
 import '../styles/globals.css';
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -18,10 +19,12 @@ export default function MyApp(props) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
+      <LanguageProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </LanguageProvider>
     </CacheProvider>
   );
 }

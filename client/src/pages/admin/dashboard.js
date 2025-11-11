@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
@@ -20,10 +20,6 @@ import {
   TableRow,
   Paper,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Tabs,
   Tab,
@@ -31,6 +27,9 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import MessageIcon from '@mui/icons-material/Message';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
+import ChatIcon from '@mui/icons-material/Chat';
+import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -44,8 +43,72 @@ export default function AdminDashboard() {
   const [chatMessages, setChatMessages] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [stats, setStats] = useState({ total: 0, unread: 0, replied: 0, pending: 0 });
-  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [replyText, setReplyText] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  // Group messages by session/user
+  const chatSessions = chatMessages.reduce((acc, msg) => {
+    const key = msg.sessionId;
+    if (!acc[key]) {
+      // Use the first non-admin message to get user info
+      const userInfo = msg.isAdminMessage 
+        ? chatMessages.find(m => m.sessionId === msg.sessionId && !m.isAdminMessage)
+        : msg;
+      
+      acc[key] = {
+        sessionId: key,
+        name: userInfo?.name || msg.name,
+        email: userInfo?.email || msg.email,
+        messages: [],
+        lastMessage: msg.timestamp,
+        unread: 0,
+      };
+    }
+    acc[key].messages.push(msg);
+    if (!msg.read && !msg.isAdminMessage) acc[key].unread++;
+    if (new Date(msg.timestamp) > new Date(acc[key].lastMessage)) {
+      acc[key].lastMessage = msg.timestamp;
+    }
+    return acc;
+  }, {});
+  
+  const sortedSessions = Object.values(chatSessions).sort(
+    (a, b) => new Date(b.lastMessage) - new Date(a.lastMessage)
+  );
+
+  // Scroll to bottom when selectedChat messages change
+  useEffect(() => {
+    if (selectedChat) {
+      scrollToBottom();
+    }
+  }, [selectedChat?.messages]);
+
+  // Update selected chat when chatMessages changes
+  useEffect(() => {
+    if (selectedChat && selectedChat.sessionId) {
+      // Rebuild the specific session from chatMessages
+      const sessionMessages = chatMessages.filter(msg => msg.sessionId === selectedChat.sessionId);
+      
+      if (sessionMessages.length > 0) {
+        // Get user info from first non-admin message
+        const userInfo = sessionMessages.find(m => !m.isAdminMessage) || sessionMessages[0];
+        
+        setSelectedChat({
+          sessionId: selectedChat.sessionId,
+          name: userInfo.name,
+          email: userInfo.email,
+          messages: sessionMessages,
+          lastMessage: Math.max(...sessionMessages.map(m => new Date(m.timestamp))),
+          unread: sessionMessages.filter(m => !m.read && !m.isAdminMessage).length,
+        });
+      }
+    }
+  }, [chatMessages]);
 
   useEffect(() => {
     // Check authentication
@@ -65,8 +128,44 @@ export default function AdminDashboard() {
     socket.emit('join', { room: 'admin' });
 
     socket.on('newMessage', (message) => {
-      setChatMessages((prev) => [message, ...prev]);
+      setChatMessages((prev) => {
+        // Check if message already exists to avoid duplicates
+        const exists = prev.some(m => m._id === message._id);
+        if (exists) return prev;
+        return [message, ...prev];
+      });
       fetchStats(token);
+    });
+
+    socket.on('adminReply', (data) => {
+      // Update messages when admin sends a reply (real-time sync across tabs)
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === data.messageId
+            ? {
+                ...msg,
+                replied: true,
+                adminReply: data.reply,
+                repliedAt: data.repliedAt,
+              }
+            : msg
+        )
+      );
+    });
+
+    socket.on('messageSent', (data) => {
+      // Handle when a message is successfully sent
+      if (data.success && data.message) {
+        // Check if message already exists
+        setChatMessages((prev) => {
+          const exists = prev.some(m => m._id === data.message._id);
+          if (!exists) {
+            return [data.message, ...prev];
+          }
+          return prev;
+        });
+        fetchStats(token);
+      }
     });
 
     return () => {
@@ -128,30 +227,114 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleReply = async () => {
-    if (!selectedMessage || !replyText.trim()) return;
+  const markAllMessagesAsRead = async (sessionId) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      // Get all unread messages in this session
+      const unreadMessages = chatMessages.filter(
+        msg => msg.sessionId === sessionId && !msg.read && !msg.isAdminMessage
+      );
+      
+      // Mark each as read
+      await Promise.all(
+        unreadMessages.map(msg => 
+          axios.put(`${API_URL}/chat/messages/${msg._id}/read`, {}, { headers })
+        )
+      );
+      
+      // Update state
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg.sessionId === sessionId && !msg.isAdminMessage
+            ? { ...msg, read: true }
+            : msg
+        )
+      );
+      
+      fetchStats(token);
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
+
+  const handleReply = async (messageId) => {
+    if (!replyText.trim()) return;
+
+    const tempReply = replyText; // Save reply text
+    setReplyText(''); // Clear input immediately
 
     try {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
-      await axios.post(
-        `${API_URL}/chat/messages/${selectedMessage._id}/reply`,
-        { reply: replyText },
+      
+      console.log('Sending reply to message:', messageId);
+      
+      const response = await axios.post(
+        `${API_URL}/chat/messages/${messageId}/reply`,
+        { reply: tempReply },
         { headers }
       );
 
-      setChatMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === selectedMessage._id
-            ? { ...msg, replied: true, adminReply: replyText }
-            : msg
-        )
-      );
-      setSelectedMessage(null);
-      setReplyText('');
+      console.log('Reply response:', response.data);
+
+      // Mark ALL unread messages in this conversation as read
+      if (selectedChat) {
+        const unreadMessages = chatMessages.filter(
+          msg => msg.sessionId === selectedChat.sessionId && !msg.read && !msg.isAdminMessage
+        );
+        
+        // Mark each unread message as read in the backend
+        await Promise.all(
+          unreadMessages.map(msg => 
+            axios.put(`${API_URL}/chat/messages/${msg._id}/read`, {}, { headers })
+          )
+        );
+        
+        // Update state - mark all messages in this session as read
+        setChatMessages((prev) =>
+          prev.map((msg) => 
+            msg.sessionId === selectedChat.sessionId && !msg.isAdminMessage
+              ? { ...msg, read: true }
+              : msg
+          )
+        );
+      }
+
+      // Don't add here - let Socket.IO handle it to avoid duplicates
+      // The Socket.IO 'newMessage' event will add it automatically
+      
       fetchStats(token);
     } catch (error) {
       console.error('Error sending reply:', error);
+      alert('Error sending reply: ' + error.message);
+    }
+  };
+
+  const handleDeleteChat = async (sessionId) => {
+    if (!confirm('Are you sure you want to delete this entire conversation? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      await axios.delete(`${API_URL}/chat/session/${sessionId}`, { headers });
+      
+      // Remove all messages with this sessionId from state
+      setChatMessages((prev) => prev.filter(msg => msg.sessionId !== sessionId));
+      
+      // Close the chat if it was selected
+      if (selectedChat?.sessionId === sessionId) {
+        setSelectedChat(null);
+      }
+      
+      fetchStats(token);
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      alert('Error deleting chat: ' + error.message);
     }
   };
 
@@ -331,68 +514,288 @@ export default function AdminDashboard() {
               <Tab label="Contact Forms" />
             </Tabs>
 
-            {/* Chat Messages Tab */}
+            {/* Chat Messages Tab - WhatsApp Style */}
             {activeTab === 0 && (
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Message</TableCell>
-                      <TableCell>Time</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {chatMessages.map((msg) => (
-                      <TableRow key={msg._id}>
-                        <TableCell>{msg.name}</TableCell>
-                        <TableCell>{msg.email}</TableCell>
-                        <TableCell>{msg.message}</TableCell>
-                        <TableCell>
-                          {new Date(msg.timestamp).toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={msg.read ? 'Read' : 'Unread'}
-                            color={msg.read ? 'success' : 'error'}
-                            size="small"
-                          />
-                          {msg.replied && (
-                            <Chip
-                              label="Replied"
-                              color="primary"
-                              size="small"
-                              sx={{ ml: 1 }}
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {!msg.read && (
-                            <Button
-                              size="small"
-                              onClick={() => handleMarkAsRead(msg._id)}
-                            >
-                              Mark Read
-                            </Button>
-                          )}
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setSelectedMessage(msg);
-                              setReplyText(msg.adminReply || '');
+              <Box sx={{ display: 'flex', height: '70vh' }}>
+                {/* Conversations List (Left Side) */}
+                <Box
+                  sx={{
+                    width: 350,
+                    borderRight: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'auto',
+                  }}
+                >
+                  {sortedSessions.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 8 }}>
+                      <MessageIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        No conversations yet
+                      </Typography>
+                    </Box>
+                  ) : (
+                    sortedSessions.map((session) => (
+                      <Box
+                        key={session.sessionId}
+                        onClick={() => {
+                          setSelectedChat(session);
+                          // Mark all unread messages as read when opening conversation
+                          if (session.unread > 0) {
+                            markAllMessagesAsRead(session.sessionId);
+                          }
+                        }}
+                        sx={{
+                          p: 2,
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                          cursor: 'pointer',
+                          bgcolor: selectedChat?.sessionId === session.sessionId ? 'action.selected' : 'transparent',
+                          '&:hover': {
+                            bgcolor: 'action.hover',
+                          },
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
+                            sx={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: '50%',
+                              bgcolor: 'primary.main',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontWeight: 700,
+                              fontSize: '1.2rem',
                             }}
                           >
-                            {msg.replied ? 'View Reply' : 'Reply'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                            {session.name.charAt(0).toUpperCase()}
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+                                {session.name}
+                              </Typography>
+                              {session.unread > 0 && (
+                          <Chip
+                                  label={session.unread}
+                            size="small"
+                              color="primary"
+                                  sx={{ height: 20, minWidth: 20 }}
+                                />
+                              )}
+                            </Box>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                              {session.email}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5 }}>
+                              {session.messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]?.isAdminMessage 
+                                ? `You: ${session.messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]?.message}`
+                                : session.messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]?.message
+                              }
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ))
+                  )}
+                </Box>
+
+                {/* Chat Window (Right Side) */}
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  {!selectedChat ? (
+                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <ChatIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary">
+                          Select a conversation to start
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <>
+                      {/* Chat Header */}
+                      <Box
+                        sx={{
+                          p: 2,
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
+                            sx={{
+                              width: 45,
+                              height: 45,
+                              borderRadius: '50%',
+                              bgcolor: 'primary.main',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontWeight: 700,
+                            }}
+                          >
+                            {selectedChat.name.charAt(0).toUpperCase()}
+                          </Box>
+                          <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                              {selectedChat.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {selectedChat.email}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteChat(selectedChat.sessionId)}
+                          color="error"
+                          title="Delete Conversation"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+
+                      {/* Messages Area */}
+                      <Box
+                        sx={{
+                          flex: 1,
+                          overflow: 'auto',
+                          p: 2,
+                          bgcolor: '#f5f5f5',
+                        }}
+                      >
+                        {selectedChat.messages
+                          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                          .map((msg, index) => (
+                            <Box key={msg._id || index}>
+                              {/* Check if this is an admin message or user message */}
+                              {msg.isAdminMessage ? (
+                                /* Admin Message */
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                                  <Paper
+                                    sx={{
+                                      p: 1.5,
+                                      maxWidth: '70%',
+                                      bgcolor: 'white',
+                                      borderRadius: 2,
+                                      borderBottomLeftRadius: 0,
+                                    }}
+                                  >
+                                    <Typography variant="caption" color="primary" sx={{ fontWeight: 700, mb: 0.5, display: 'block' }}>
+                                      You
+                                    </Typography>
+                                    <Typography variant="body1">{msg.message}</Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      sx={{
+                                        display: 'block',
+                                        mt: 0.5,
+                                      }}
+                                    >
+                                      {new Date(msg.timestamp).toLocaleTimeString()}
+                                    </Typography>
+                                  </Paper>
+                                </Box>
+                              ) : (
+                                /* User Message */
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                                  <Paper
+                                    sx={{
+                                      p: 1.5,
+                                      maxWidth: '70%',
+                                      bgcolor: 'primary.main',
+                                      color: 'white',
+                                      borderRadius: 2,
+                                      borderBottomRightRadius: 0,
+                                    }}
+                                  >
+                                    <Typography variant="body1">{msg.message}</Typography>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        opacity: 0.8,
+                                        display: 'block',
+                                        mt: 0.5,
+                                        textAlign: 'right',
+                                      }}
+                                    >
+                                      {new Date(msg.timestamp).toLocaleTimeString()}
+                                    </Typography>
+                                  </Paper>
+                                </Box>
+                              )}
+                            </Box>
+                          ))}
+                        <div ref={messagesEndRef} />
+                      </Box>
+
+                      {/* Reply Input Area */}
+                      <Box
+                        sx={{
+                          p: 2,
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            placeholder="Type your reply..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                // Find the last USER message (not admin message) to reply to
+                                const lastUserMsg = selectedChat.messages
+                                  .filter(m => !m.isAdminMessage)
+                                  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                                if (lastUserMsg) {
+                                  handleReply(lastUserMsg._id);
+                                }
+                              }
+                            }}
+                          />
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              // Find the last USER message (not admin message) to reply to
+                              const lastUserMsg = selectedChat.messages
+                                .filter(m => !m.isAdminMessage)
+                                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                              if (lastUserMsg) {
+                                handleReply(lastUserMsg._id);
+                              }
+                            }}
+                            disabled={!replyText.trim()}
+                            sx={{
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              '&:hover': {
+                                bgcolor: 'primary.dark',
+                              },
+                              '&:disabled': {
+                                bgcolor: 'action.disabledBackground',
+                              },
+                            }}
+                          >
+                            <SendIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                </Box>
+              </Box>
             )}
 
             {/* Contact Forms Tab */}
@@ -465,42 +868,6 @@ export default function AdminDashboard() {
         </Container>
       </Box>
 
-      {/* Reply Dialog */}
-      <Dialog
-        open={!!selectedMessage}
-        onClose={() => setSelectedMessage(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          {selectedMessage?.replied ? 'View Reply' : 'Reply to Message'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Original Message:
-            </Typography>
-            <Typography variant="body1">{selectedMessage?.message}</Typography>
-          </Box>
-          <TextField
-            fullWidth
-            label="Your Reply"
-            multiline
-            rows={4}
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            disabled={selectedMessage?.replied}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSelectedMessage(null)}>Cancel</Button>
-          {!selectedMessage?.replied && (
-            <Button onClick={handleReply} variant="contained">
-              Send Reply
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

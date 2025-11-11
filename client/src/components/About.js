@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../contexts/LanguageContext';
 import { Box, Container, Typography, Grid, Card, CardContent, Avatar } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -7,36 +8,38 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
-const features = [
-  'Expert developers with years of experience',
-  'Modern technology stack',
-  'Responsive and mobile-first design',
-  'SEO optimized from the ground up',
-  'Fast turnaround times',
-  'Ongoing support and maintenance',
-  'Competitive pricing',
-  'Clear communication throughout',
-];
-
-const values = [
-  {
-    icon: <GroupsIcon sx={{ fontSize: 40 }} />,
-    title: 'Client-Focused',
-    description: 'Your success is our success. We work closely with you to understand your needs.',
-  },
-  {
-    icon: <EmojiEventsIcon sx={{ fontSize: 40 }} />,
-    title: 'Quality First',
-    description: 'We never compromise on quality and always strive for excellence.',
-  },
-  {
-    icon: <FavoriteIcon sx={{ fontSize: 40 }} />,
-    title: 'Passionate Team',
-    description: 'We love what we do, and it shows in every project we deliver.',
-  },
-];
-
 export default function About() {
+  const { t } = useTranslation();
+  
+  const features = [
+    t('about.features.experts'),
+    t('about.features.modern'),
+    t('about.features.responsive'),
+    t('about.features.seo'),
+    t('about.features.fast'),
+    t('about.features.support'),
+    t('about.features.pricing'),
+    t('about.features.communication'),
+  ];
+
+  const values = [
+    {
+      icon: <GroupsIcon sx={{ fontSize: 40 }} />,
+      title: t('about.values.clientFocused.title'),
+      description: t('about.values.clientFocused.description'),
+    },
+    {
+      icon: <EmojiEventsIcon sx={{ fontSize: 40 }} />,
+      title: t('about.values.quality.title'),
+      description: t('about.values.quality.description'),
+    },
+    {
+      icon: <FavoriteIcon sx={{ fontSize: 40 }} />,
+      title: t('about.values.passionate.title'),
+      description: t('about.values.passionate.description'),
+    },
+  ];
+
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -69,7 +72,7 @@ export default function About() {
                   letterSpacing: 2,
                 }}
               >
-                ABOUT US
+                {t('about.title')}
               </Typography>
               <Typography
                 variant="h2"
@@ -80,16 +83,14 @@ export default function About() {
                   fontSize: { xs: '2.5rem', md: '3rem' },
                 }}
               >
-                Why Choose <span className="gradient-text">Us</span>
+                {t('about.heading')} <span className="gradient-text">{t('about.headingHighlight')}</span>
               </Typography>
               <Typography
                 variant="body1"
                 color="text.secondary"
                 sx={{ mb: 4, lineHeight: 1.8, fontSize: '1.1rem' }}
               >
-                We are a team of passionate developers dedicated to creating 
-                exceptional web experiences. With years of experience and a 
-                commitment to excellence, we transform your ideas into reality.
+                {t('about.description')}
               </Typography>
 
               <Box sx={{ mb: 4 }}>
@@ -178,4 +179,5 @@ export default function About() {
     </Box>
   );
 }
+
 

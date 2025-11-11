@@ -37,6 +37,10 @@ const chatMessageSchema = new mongoose.Schema({
   },
   repliedAt: {
     type: Date
+  },
+  isAdminMessage: {
+    type: Boolean,
+    default: false
   }
 });
 

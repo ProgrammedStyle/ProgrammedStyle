@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../contexts/LanguageContext';
 import { Box, Container, Grid, Typography, IconButton, Link } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -10,6 +11,8 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   const currentYear = new Date().getFullYear();
 
   return (
@@ -34,8 +37,7 @@ export default function Footer() {
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Building modern, professional websites that help businesses grow online. 
-              We transform your vision into reality with cutting-edge web technologies.
+              {t('footer.description')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton 
@@ -56,26 +58,6 @@ export default function Footer() {
                   '&:hover': { bgcolor: 'primary.dark' }
                 }}
               >
-                <TwitterIcon fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                sx={{ 
-                  bgcolor: 'primary.main', 
-                  color: 'white',
-                  '&:hover': { bgcolor: 'primary.dark' }
-                }}
-              >
-                <LinkedInIcon fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                sx={{ 
-                  bgcolor: 'primary.main', 
-                  color: 'white',
-                  '&:hover': { bgcolor: 'primary.dark' }
-                }}
-              >
                 <InstagramIcon fontSize="small" />
               </IconButton>
             </Box>
@@ -84,13 +66,19 @@ export default function Footer() {
           {/* Quick Links */}
           <Grid item xs={12} sm={6} md={4}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              Quick Links
+              {t('footer.quickLinks')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {['Home', 'Services', 'Portfolio', 'About', 'Contact'].map((item) => (
+              {[
+                { label: t('nav.home'), href: '#home' },
+                { label: t('nav.services'), href: '#services' },
+                { label: t('nav.portfolio'), href: '#portfolio' },
+                { label: t('nav.about'), href: '#about' },
+                { label: t('nav.contact'), href: '#contact' },
+              ].map((item) => (
                 <Link
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+                  key={item.href}
+                  href={item.href}
                   sx={{
                     color: 'text.secondary',
                     textDecoration: 'none',
@@ -100,7 +88,7 @@ export default function Footer() {
                     },
                   }}
                 >
-                  {item}
+                  {item.label}
                 </Link>
               ))}
             </Box>
@@ -109,25 +97,25 @@ export default function Footer() {
           {/* Contact Info */}
           <Grid item xs={12} sm={6} md={4}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              Contact Us
+              {t('footer.contactUs')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <EmailIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                 <Typography variant="body2" color="text.secondary">
-                  info@programmedstyle.com
+                  programmedstyle@gmail.com
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PhoneIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                 <Typography variant="body2" color="text.secondary">
-                  +1 (555) 123-4567
+                  00970592067569
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocationOnIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                 <Typography variant="body2" color="text.secondary">
-                  123 Web Street, Digital City, DC 12345
+                  Nablus Street, Qalqilia, Palestine
                 </Typography>
               </Box>
             </Box>
@@ -145,11 +133,12 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {currentYear} ProgrammedStyle. All rights reserved. Built with ❤️ and React.
+            © {currentYear} {t('footer.copyright')}
           </Typography>
         </Box>
       </Container>
     </Box>
   );
 }
+
 

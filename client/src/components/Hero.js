@@ -3,8 +3,12 @@ import { Box, Container, Typography, Button, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useTranslation } from '../contexts/LanguageContext';
 
 export default function Hero() {
+  const { t, language } = useTranslation();
+  const isRTL = language === 'ar';
+  
   const scrollToContact = () => {
     document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -65,7 +69,7 @@ export default function Hero() {
                   variant="body2"
                   sx={{ color: 'white', fontWeight: 600 }}
                 >
-                  Professional Web Development
+                  {t('hero.badge')}
                 </Typography>
               </Box>
 
@@ -79,7 +83,7 @@ export default function Hero() {
                   lineHeight: 1.2,
                 }}
               >
-                Build Your Dream Website With Us
+                {t('hero.title')}
               </Typography>
 
               <Typography
@@ -92,9 +96,7 @@ export default function Hero() {
                   fontWeight: 400,
                 }}
               >
-                We create stunning, modern, and responsive websites that help your 
-                business stand out online. From concept to launch, we're with you 
-                every step of the way.
+                {t('hero.description')}
               </Typography>
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -102,7 +104,7 @@ export default function Hero() {
                   variant="contained"
                   size="large"
                   onClick={scrollToContact}
-                  endIcon={<ArrowForwardIcon />}
+                  {...(isRTL ? { startIcon: <ArrowForwardIcon /> } : { endIcon: <ArrowForwardIcon /> })}
                   sx={{
                     background: 'linear-gradient(135deg, #5ec1a2 0%, #06bf8b 100%)',
                     color: '#ffffff',
@@ -114,6 +116,11 @@ export default function Hero() {
                     '& .MuiButton-endIcon': {
                       color: '#ffffff',
                     },
+                    '& .MuiButton-startIcon': {
+                      color: '#ffffff',
+                      marginLeft: isRTL ? '12px' : '-4px',
+                      marginRight: isRTL ? '0px' : '8px',
+                    },
                     '&:hover': {
                       background: 'linear-gradient(135deg, #4db398 0%, #05a876 100%)',
                       transform: 'translateY(-2px)',
@@ -122,7 +129,7 @@ export default function Hero() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Get Started
+                  {t('hero.getStarted')}
                 </Button>
                 <Button
                   variant="outlined"
@@ -142,7 +149,7 @@ export default function Hero() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Our Services
+                  {t('hero.ourServices')}
                 </Button>
               </Box>
             </motion.div>
@@ -226,10 +233,10 @@ export default function Hero() {
             }}
           >
             {[
-              { number: '100+', label: 'Projects Completed' },
-              { number: '50+', label: 'Happy Clients' },
-              { number: '5+', label: 'Years Experience' },
-              { number: '24/7', label: 'Support Available' },
+              { number: '5+', label: t('hero.stats.projects') },
+              { number: '4+', label: t('hero.stats.clients') },
+              { number: '5+', label: t('hero.stats.experience') },
+              { number: '24/7', label: t('hero.stats.support') },
             ].map((stat, index) => (
               <Grid item xs={6} md={3} key={index}>
                 <Box sx={{ textAlign: 'center' }}>
