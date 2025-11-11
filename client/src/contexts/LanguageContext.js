@@ -10,10 +10,12 @@ const translations = {
 };
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState('ar'); // Always start with 'ar' for SSR
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Load saved language from localStorage (client-side only)
+    // Mark as mounted and load saved language
+    setMounted(true);
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('language');
       if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
@@ -24,12 +26,12 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     // Save language to localStorage and update document (client-side only)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && mounted) {
       localStorage.setItem('language', language);
       document.documentElement.lang = language;
       document.dir = language === 'ar' ? 'rtl' : 'ltr';
     }
-  }, [language]);
+  }, [language, mounted]);
 
   const t = (key) => {
     const keys = key.split('.');
