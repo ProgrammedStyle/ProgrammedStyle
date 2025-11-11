@@ -41,6 +41,10 @@ export default function Footer() {
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton 
+                component="a"
+                href="https://www.facebook.com/profile.php?id=61582352101462"
+                target="_blank"
+                rel="noopener noreferrer"
                 size="small" 
                 sx={{ 
                   bgcolor: 'primary.main', 
@@ -51,6 +55,10 @@ export default function Footer() {
                 <FacebookIcon fontSize="small" />
               </IconButton>
               <IconButton 
+                component="a"
+                href="https://www.instagram.com/programmedstyle/"
+                target="_blank"
+                rel="noopener noreferrer"
                 size="small" 
                 sx={{ 
                   bgcolor: 'primary.main', 
