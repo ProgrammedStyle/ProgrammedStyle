@@ -35,7 +35,7 @@ export default function Hero() {
           right: 0,
           bottom: 0,
           opacity: 0.1,
-          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23D0EDE4\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
         }}
       />
 
@@ -85,7 +85,7 @@ export default function Hero() {
               <Typography
                 variant="h6"
                 sx={{
-                  color: 'rgba(255, 255, 255, 0.9)',
+                  color: 'white',
                   mb: 4,
                   fontSize: { xs: '1.1rem', md: '1.25rem' },
                   lineHeight: 1.6,
@@ -104,15 +104,20 @@ export default function Hero() {
                   onClick={scrollToContact}
                   endIcon={<ArrowForwardIcon />}
                   sx={{
-                    bgcolor: 'white',
-                    color: 'primary.main',
+                    background: 'linear-gradient(135deg, #5ec1a2 0%, #06bf8b 100%)',
+                    color: '#ffffff',
                     px: 4,
                     py: 1.5,
                     fontSize: '1.1rem',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 14px rgba(6, 191, 139, 0.3)',
+                    '& .MuiButton-endIcon': {
+                      color: '#ffffff',
+                    },
                     '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.9)',
+                      background: 'linear-gradient(135deg, #4db398 0%, #05a876 100%)',
                       transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                      boxShadow: '0 6px 16px rgba(6, 191, 139, 0.25)',
                     },
                     transition: 'all 0.3s ease',
                   }}
@@ -191,7 +196,7 @@ export default function Hero() {
                     <Typography
                       variant="h3"
                       sx={{
-                        color: 'white',
+                        color: 'rgb(208, 237, 228)',
                         fontWeight: 800,
                         textAlign: 'center',
                       }}
@@ -242,8 +247,9 @@ export default function Hero() {
                   <Typography
                     variant="body1"
                     sx={{
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: 'white',
                       fontSize: { xs: '0.9rem', md: '1rem' },
+                      fontWeight: 500,
                     }}
                   >
                     {stat.label}

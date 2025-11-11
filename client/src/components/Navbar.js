@@ -97,7 +97,8 @@ export default function Navbar() {
               <CodeIcon 
                 sx={{ 
                   fontSize: 32, 
-                  color: 'primary.main',
+                  color: scrolled ? 'primary.main' : 'rgb(208, 237, 228)',
+                  transition: 'color 0.3s ease',
                   animation: 'pulse 2s ease-in-out infinite',
                   '@keyframes pulse': {
                     '0%, 100%': { opacity: 1 },
@@ -113,6 +114,16 @@ export default function Navbar() {
                   fontSize: '1.5rem',
                   color: scrolled ? 'text.primary' : 'white',
                   transition: 'color 0.3s ease',
+                  '& .gradient-text': {
+                    background: scrolled 
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                      : 'linear-gradient(135deg, #afffcb 0%, #27d898 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    fontWeight: 700,
+                    transition: 'all 0.3s ease',
+                  }
                 }}
               >
                 Programmed<span className="gradient-text">Style</span>

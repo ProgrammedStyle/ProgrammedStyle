@@ -129,6 +129,7 @@ const theme = createTheme({
         },
         contained: {
           background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          color: '#ffffff',
           '&:hover': {
             background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
           },
