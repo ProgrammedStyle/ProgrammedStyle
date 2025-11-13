@@ -9,7 +9,8 @@ export default class MyDocument extends Document {
       <Html lang="en">
         <Head>
           <meta charSet="utf-8" />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/ProgrammedStyle Logo.png" />
+          <link rel="apple-touch-icon" href="/ProgrammedStyle Logo.png" />
           <meta name="theme-color" content="#10b981" />
           <meta name="description" content="ProgrammedStyle - Professional Web Development Services. We build modern, responsive websites tailored to your business needs." />
           <meta name="keywords" content="web development, website design, react, nextjs, nodejs, professional websites, custom web solutions" />
