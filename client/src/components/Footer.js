@@ -111,7 +111,7 @@ export default function Footer() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <EmailIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                 <Typography variant="body2" color="text.secondary">
-                  programmedstyle@gmail.com
+                  printedstyle24@gmail.com
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

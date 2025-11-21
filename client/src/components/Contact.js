@@ -77,7 +77,7 @@ export default function Contact() {
     {
       icon: <EmailIcon sx={{ fontSize: 32 }} />,
       title: t('contact.info.email'),
-      value: 'programmedstyle@gmail.com',
+      value: 'printedstyle24@gmail.com',
     },
     {
       icon: <PhoneIcon sx={{ fontSize: 32 }} />,
